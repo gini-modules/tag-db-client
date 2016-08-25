@@ -5,14 +5,14 @@ namespace Gini\TagDB;
 class Client
 {
     private $_driver;
-    private $_drivers = [];
+    private static $_drivers = [];
 
-    public function of($name)
+    public static function of($name)
     {
         if (!isset(self::$_drivers[$name])) {
-            $opts = \Gini\Config::get('tagdb.client');
+            $opts = \Gini\Config::get('tagdb.clients');
             $opts = isset($opts[$name]) ? $opts[$name] : $opts['default'];
-            self::$_engines[$name] = \Gini\IoC::construct('\Gini\TagDB\Client', $opts['driver'], (array)@$opts['options']);
+            self::$_drivers[$name] = \Gini\IoC::construct('\Gini\TagDB\Client', $opts['driver'], (array)@$opts['options']);
         }
         return self::$_drivers[$name];
     }
