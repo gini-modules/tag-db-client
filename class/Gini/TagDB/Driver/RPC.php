@@ -4,28 +4,75 @@ namespace Gini\TagDB\Driver;
 
 class RPC implements \Gini\TagDB\IDriver
 {
-
+    public static $cacheTimeout = 86400;
     private $_rpc;
+    private $_opt;
     public function __construct(array $opt)
     {
+        $this->_opt = $opt;
+    }
+
+    private static function getCacheTimeout()
+    {
+        $timeout = \Gini\Config::get('tag-db-client.cache-timeout');
+        $timeout = is_numeric($timeout) ? $timeout : self::$cacheTimeout;
+        return $timeout;
+    }
+
+    private function getRPC()
+    {
+        $opt = $this->_opt;
         $url = $opt['url'];
         $client = $opt['client'];
         $clientID = $client['id'];
         $clientSecret = $client['secret'];
         $rpc = \Gini\IoC::construct('\Gini\RPC', $url);
-        $rpc->tagdb->authorize($clientID, $clientSecret);
 
-        $this->_rpc = $rpc;
+        $cacheKey = "app#{$url}#{$clientID}#token#{$clientSecret}";
+        $token = self::cache($key);
+        if ($token) {
+            $rpc->setHeader(['X-Gini-Session' => $token]);
+        } else {
+            $token = $rpc->tagdb->authorize($clientID, $clientSecret);
+            if ($token) {
+                self::cache($key, $token, 720);
+            }
+        }
+
+        return $rpc;
     }
 
     public function get($key)
     {
-        return $this->_rpc->tagdb->data->get($key);
+        $key = md5(J($key));
+        $cacheKey = "tag-db-client#{$key}";
+        $data = self::cache($cacheKey);
+        if (is_array($data)) {
+            return $data;
+        }
+        $data = $this->getRPC()->tagdb->data->get($key);
+        self::cache($cacheKey, $data);
+        return $data;
     }
 
     public function set($key, $data)
     {
-        return $this->_rpc->tagdb->data->set($key, $data);
+        $bool = $this->getRPC()->tagdb->data->set($key, $data);
+        if ($bool) {
+            $key = md5(J($key));
+            $cacheKey = "tag-db-client#{$key}";
+            self::cache($cacheKey, $data);
+        }
+        return $bool;
+    }
+
+    private static function cache($key, $value=null, $timeout=null)
+    {
+        $cacher = \Gini\Cache::of('chemdb');
+        if (is_null($value)) {
+            return $cacher->get($key);
+        }
+        $cacher->set($key, $value, $timeout ?: self::getCacheTimeout());
     }
 
 }
