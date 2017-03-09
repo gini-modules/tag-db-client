@@ -44,8 +44,8 @@ class RPC implements \Gini\TagDB\IDriver
 
     public function get($key)
     {
-        $key = md5(J($key));
-        $cacheKey = "tag-db-client#{$key}";
+        $ckey = md5(J($key));
+        $cacheKey = "tag-db-client#{$ckey}";
         $data = self::cache($cacheKey);
         if (is_array($data)) {
             return $data;
@@ -59,8 +59,8 @@ class RPC implements \Gini\TagDB\IDriver
     {
         $bool = $this->getRPC()->tagdb->data->set($key, $data);
         if ($bool) {
-            $key = md5(J($key));
-            $cacheKey = "tag-db-client#{$key}";
+            $ckey = md5(J($key));
+            $cacheKey = "tag-db-client#{$ckey}";
             self::cache($cacheKey, $data);
         }
         return $bool;
