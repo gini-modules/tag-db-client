@@ -16,6 +16,10 @@ class RPC implements \Gini\TagDB\IDriver
     {
         $timeout = \Gini\Config::get('tag-db-client.cache-timeout');
         $timeout = is_numeric($timeout) ? $timeout : self::$cacheTimeout;
+        $float = (int) ($timeout / 10);
+        $minFloat = 10;
+        $float = ($float>$minFloat) ? $float : $minFloat;
+        $timeout += rand(1, $float);
         return $timeout;
     }
 
