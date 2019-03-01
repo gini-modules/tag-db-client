@@ -1,5 +1,8 @@
 ---
+tag-db-client-use-agent: ${TAG_DB_CLIENT_USE_AGENT:='false'}
 clients:
   default:
     driver: database
+  agent:
+    driver: agent
 ...

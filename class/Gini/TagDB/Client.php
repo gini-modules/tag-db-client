@@ -9,6 +9,9 @@ class Client
 
     public static function of($name)
     {
+        if (\Gini\Config::get('tagdb.tag-db-client-use-agent') && strtolower($name)=='rpc') {
+            $name = 'agent';
+        }
         if (!isset(self::$_drivers[$name])) {
             $opts = \Gini\Config::get('tagdb.clients');
             $opts = isset($opts[$name]) ? $opts[$name] : $opts['default'];
