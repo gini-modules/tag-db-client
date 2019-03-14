@@ -2,7 +2,7 @@
     "id": "tag-db-client",
     "name": "tag-db-client",
     "description": "TagDB CLIENT",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "dependencies": {
         "gini": ">=1.5.4",
         "cache": "*"
