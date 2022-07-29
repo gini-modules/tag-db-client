@@ -9,7 +9,7 @@
 
 namespace Gini\ORM\TagDB;
 
-class Agent extends \Gini\ORM\Object
+class Agent extends \Gini\ORM\Base
 {
     protected static $db_name = 'admin';
 
